@@ -17,8 +17,9 @@ signature: v1.eyJzdWIiOiIzNDY3IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYX
   const filed = { parser: `${repo}/1`, hint: `${repo}/2`, 'one-day move': `${repo}/3` };
 </script>
 
-[#4471](/kb/incidents/4471) is marked known: one bug, one fix queued. Its reports hold three
-problems. The queued parser fix closes only the first one. Each problem now has its own ticket.
+[#4471](/kb/incidents/4471) was marked known: one bug, one fix queued. Its reports hold three
+problems, and each one now has its own ticket. Engineering closed #4471 on 5 October. That closes
+two of the three problems. The one-day move is still open.
 
 <Callout kind="warn">
 The #4471 page already shows this. Its cause table marks <code>hint</code> as "no ticket of its
@@ -39,6 +40,15 @@ own", and a footnote under <code>parser</code> counts one-day moves. Neither had
   bug. The desk had already read these reports as one-day moves (`desk-notes.json`), but
   the tenant rule filed them under `parser`.
 
+## Where each one stands
+
+From the engineering update that closed #4471 on 5 October:
+
+- **parser:** fixed in "fix(dates): parse dd/mm for eu locales". Ticket closed.
+- **hint:** won't fix, because the booking-v3 form is retired. Ticket closed as not planned.
+- **one-day move:** not in the update, and the parser fix does not change a one-day shift.
+  **Still open.** New one-day reports go on its ticket.
+
 ## Why they were merged
 
 [Decision 0001](/kb/decisions/0001-dedupe-by-subject) merges reports on subject line alone. All
@@ -52,8 +62,8 @@ browser, and the cause comes from the tenant's form and locale.
 
 ## For the desk
 
-- When the parser fix ships, expect reports from booking-v3 forms and one-day moves to keep coming.
-  They belong on the tickets above, not on #4471.
+- The parser fix has shipped. A date report that still comes in is probably a one-day move.
+  Put it on the one-day ticket, not on #4471.
 - Before you merge on subject, check the tenant's form and whether the date swapped or moved by a day.
 
 <RenderStamp {signature} />
