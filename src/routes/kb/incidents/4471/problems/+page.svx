@@ -1,0 +1,59 @@
+---
+layout: runbook
+title: '#4471 · three problems, not one'
+owner: bill mcculloch
+status: open
+reviewed: 2026-10-28
+signature: v1.eyJzdWIiOiIzNDY3IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMxODI2MTEsImV4cCI6MTc5MzI2OTAxMX0.x2fZrPLexl7tziGSxusbDzYHiElMnbefUxNPe3qZusU
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import CauseTable from '#lib/kb/CauseTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const repo = 'https://github.com/billmcculloch/support-kb/issues';
+  const filed = { parser: `${repo}/1`, hint: `${repo}/2`, 'one-day move': `${repo}/3` };
+</script>
+
+[#4471](/kb/incidents/4471) is marked known: one bug, one fix queued. Its reports hold three
+problems. The queued parser fix closes only the first one. Each problem now has its own ticket.
+
+<Callout kind="warn">
+The #4471 page already shows this. Its cause table marks <code>hint</code> as "no ticket of its
+own", and a footnote under <code>parser</code> counts one-day moves. Neither had a ticket until now.
+</Callout>
+
+## The problems
+
+<ProblemTable ticket={4471} {filed} />
+
+- **parser.** The shared parser reads every date month first. Every tenant on file writes the
+  day first, so day and month swap. This is the bug #4471 names.
+- **hint.** The booking-v3 form prints `MM/DD/YYYY` under its date field and then reads the
+  date day first. People do what the hint says, so the date swaps. The parser fix does not touch
+  this form.
+- **one-day move.** The date moves by one day, not by a swap: Tuesday becomes Monday, Lisbon and
+  Toronto see different days, an invite arrives before its booking. This looks like a time-zone
+  bug. The desk had already read these reports as one-day moves (`desk-notes.json`), but
+  the tenant rule filed them under `parser`.
+
+## Why they were merged
+
+[Decision 0001](/kb/decisions/0001-dedupe-by-subject) merges reports on subject line alone. All
+three problems produce the same subjects ("Date is wrong", "Wrong day on the invite"), so one
+ticket took them all. Intake tags do not separate them either: they come from the reporter's
+browser, and the cause comes from the tenant's form and locale.
+
+## What #4471 showed
+
+<CauseTable ticket={4471} />
+
+## For the desk
+
+- When the parser fix ships, expect reports from booking-v3 forms and one-day moves to keep coming.
+  They belong on the tickets above, not on #4471.
+- Before you merge on subject, check the tenant's form and whether the date swapped or moved by a day.
+
+<RenderStamp {signature} />
