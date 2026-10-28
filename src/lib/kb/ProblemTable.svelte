@@ -13,21 +13,22 @@
     'one-day move': 'date moves by one day (time zone), not a swap',
   };
 
-  // The desk's own notes outrank the tenant rule: a one-day move is not a swap, whatever the tenant.
-  function problemOf(r: Report): Problem | 'unplaced' {
-    if (notes.oneDayMove.includes(r.id)) return 'one-day move';
-    return causeOf(r, tenantOf(r)) ?? 'unplaced';
+  // Counted the desk's way: every report under its cause by tenant; one-day moves stay there too
+  // and are also counted on their own row (desk-notes.json), as CauseTable footnotes them.
+  function inProblem(r: Report, p: Problem): boolean {
+    return p === 'one-day move' ? notes.oneDayMove.includes(r.id) : causeOf(r, tenantOf(r)) === p;
   }
 
   const merged = $derived(uniqueById(reports as Report[]).filter((r) => r.mergedInto === ticket));
   const rows = $derived(
     (Object.keys(LABEL) as Problem[]).map((p) => {
-      const rs = merged.filter((r) => problemOf(r) === p);
+      const rs = merged.filter((r) => inProblem(r, p));
       const days = rs.map((r) => r.receivedAt.slice(0, 10)).sort();
       return { p, count: rs.length, tenants: new Set(rs.map((r) => r.tenant)).size, first: days[0], last: days[days.length - 1] };
     }),
   );
-  const placed = $derived(rows.reduce((n, r) => n + r.count, 0));
+  const placed = $derived(merged.filter((r) => causeOf(r, tenantOf(r)) !== null).length);
+  const alsoParser = $derived(merged.filter((r) => inProblem(r, 'one-day move') && inProblem(r, 'parser')).length);
 </script>
 
 <p class="sum">
@@ -50,6 +51,11 @@
   </tbody>
 </table>
 
+{#if alsoParser}
+  <p class="note">{alsoParser} one-day moves are also counted under <code>parser</code>, where the desk files them by tenant.</p>
+{/if}
+
 <style>
   .sum { font-size: 1.1rem; }
+  .note { color: var(--muted); font-size: 0.85em; }
 </style>
